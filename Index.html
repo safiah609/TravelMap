@@ -3,15 +3,16 @@
 <head>
     <meta charset="utf-8">
     <title>D3: Choropleth</title>
+    <link rel="stylesheet" href="styles.css"/>
     <script src="https://d3js.org/d3.v4.js"></script>
 </head>
 <body>
 <script type="text/javascript">
-    var w = 800;
-    var h = 500;
+    var w = 1500;
+    var h = 1500;
     var projection = d3.geoAlbersUsa()
-            .translate([w/2, h/2])
-            .scale([700]);
+            .translate([w/2, h/(5)])
+            .scale([1300]);
 
     var path = d3.geoPath()
             .projection(projection);
@@ -55,20 +56,24 @@
                     .data(json.features)
                     .enter()
                     .append("path")
+                    .attr("class", "feature")
                     .attr("d", path)
                     .style("fill", function(d) {
-                        //Get data value
-                        var value = d.properties.value;
-
-                        if (value) {
-                            //If value exists…
-                            return color(value);
-                        } else {
-                            //If value is undefined…
-                            return "#ccc";
-                        }
+//                        //Get data value
+//                        var value = d.properties.value;
+//
+//                        if (value) {
+//                            //If value exists…
+//                            return color(value);
+//                        } else {
+//                            //If value is undefined…
+//                            return "#ccc";
+//                        }
+                        return "lightblue"
                     });
         });
+
+
     });
 
 </script>
