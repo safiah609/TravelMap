@@ -2,7 +2,7 @@ var us_intl_airport_CODES;
 var all_us_intl_airpoots;
 var lat_long = [];
 var unique_codes = [];
-
+var valid_codes = [];
 
 function drawMap (all_us_intl_airpoots) {
     var w = 1500;
@@ -82,17 +82,17 @@ function drawMap (all_us_intl_airpoots) {
             l = []
             l.push(all_us_intl_airpoots[0])
             // add circles to svg
-            console.log("len of data is "+all_us_intl_airpoots.length)
+            // console.log("len of data is "+all_us_intl_airpoots.length)
             svg.selectAll("circle")
                 .data(all_us_intl_airpoots).enter()
                 .append("circle")
                 .attr("cx", function (d) {
-                    console.log("d before if is "+d)
+                    // console.log("d before if is "+d)
                     if(d!==null && projection(d)!=null) {
-                        console.log("d is "+ d)
+                        // console.log("d is "+ d)
                         if(d[0]<0) {
                             if (projection(d)[0] != null) {
-                                console.log("projection of d is " + projection(d));
+                                // console.log("projection of d is " + projection(d));
                                 return projection(d)[0];
 
                             }
@@ -100,17 +100,23 @@ function drawMap (all_us_intl_airpoots) {
                     }
                 })
                 .attr("cy", function (d) {
-                    console.log("d before if is "+d)
+                    // console.log("d before if is "+d)
                     if(d!==null && projection(d)!=null) {
-                        console.log("d is "+ d)
+                        // console.log("d is "+ d)
                         if (projection(d)[1] != null) {
-                            console.log("projection of d is " + projection(d));
+                            // console.log("projection of d is " + projection(d));
                             return projection(d)[1];
                         }
                     }
                 })
-                .attr("r", "2px")
+                .attr("r", "4px")
                 .attr("fill", "red")
+                .on("click", function () {
+                    console.log("CLICKED")
+                })
+                .on("mouseover", function () {
+                    console.log("HOVERING")
+                })
         });
     });
 }
@@ -159,7 +165,7 @@ d3.csv("data/us_international_airports.csv", function (error, csv) {
         // console.log("code is "+d.code)
         // Convert numeric values to 'numbers'
         d.code = d.code;
-
+        valid_codes.push(d.code);
     });
 
     // var us_intl_airport_CODES = us_international_airports.map(function (d) {
@@ -168,7 +174,7 @@ d3.csv("data/us_international_airports.csv", function (error, csv) {
 
     // Store csv data in a global variable
     us_intl_airport_CODES = csv;
-    // console.log(us_intl_airport_CODES)
+    // console.log("codes are")
     // console.log("size of intl. airport codes is "+us_intl_airport_CODES.length) //should be 68
 });
 
@@ -176,12 +182,13 @@ d3.csv("data/us_international_airports.csv", function (error, csv) {
 d3.csv("data/airports.csv", function (error, csv) {
     csv.forEach(function (d) {
         // console.log("-")
-
+        temp_check = []
         //Check if airport is already included in our list (-1 ==> not in list 0 ==>in list
-        if(us_intl_airport_CODES.indexOf(d.IATA_Code) < 0 && d.Country === "United States") {
+        if(valid_codes.indexOf(d.IATA_Code) >= 0 && d.Country === "United States") {
             // console.log(d.IATA_Code)
-            // console.log(us_intl_airport_CODES.indexOf("SLC"))
-            if(us_intl_airport_CODES.indexOf(d.IATA_Code) < 0) {
+
+            // console.log("index of C91 is "+us_intl_airport_CODES.indexOf("C91"))
+            if(temp_check.indexOf(d.IATA_Code) < 0) {
                 d.IATA_Code = d.IATA_Code;
                 d.Country = d.Country;
                 State = {"IATA": d.IATA_Code, "Lat": d.Lat, "Long": d.Long};
@@ -189,12 +196,13 @@ d3.csv("data/airports.csv", function (error, csv) {
                 lat_long.push(l)
                 // console.log("d of 0 is "+l[0])
                 unique_codes.push(l)
-                console.log(d.Country)
+                temp_check.push(d.IATA_Code)
+                // console.log(d.Country)
             }
         }
     });
 
     all_us_intl_airpoots = unique_codes;
-    console.log("size of intl. airports is "+all_us_intl_airpoots.length) //should be 1697
+    // console.log("size of intl. airports is "+all_us_intl_airpoots.length)
     drawMap(all_us_intl_airpoots)
 });
