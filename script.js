@@ -1,6 +1,7 @@
 var us_intl_airport_CODES;
 var all_us_intl_airpoots;
 var lat_long = [];
+var unique_codes = [];
 
 
 function drawMap (all_us_intl_airpoots) {
@@ -81,12 +82,13 @@ function drawMap (all_us_intl_airpoots) {
             l = []
             l.push(all_us_intl_airpoots[0])
             // add circles to svg
+            console.log("len of data is "+all_us_intl_airpoots.length)
             svg.selectAll("circle")
                 .data(all_us_intl_airpoots).enter()
                 .append("circle")
                 .attr("cx", function (d) {
                     console.log("d before if is "+d)
-                    if(d!=null) {
+                    if(d!==null && projection(d)!=null) {
                         console.log("d is "+ d)
                         if(d[0]<0) {
                             if (projection(d)[0] != null) {
@@ -99,7 +101,7 @@ function drawMap (all_us_intl_airpoots) {
                 })
                 .attr("cy", function (d) {
                     console.log("d before if is "+d)
-                    if(d!=null) {
+                    if(d!==null && projection(d)!=null) {
                         console.log("d is "+ d)
                         if (projection(d)[1] != null) {
                             console.log("projection of d is " + projection(d));
@@ -107,7 +109,7 @@ function drawMap (all_us_intl_airpoots) {
                         }
                     }
                 })
-                .attr("r", "8px")
+                .attr("r", "2px")
                 .attr("fill", "red")
         });
     });
@@ -171,13 +173,15 @@ d3.csv("data/us_international_airports.csv", function (error, csv) {
 });
 
 // Load CSV files
-var unique_codes = [];
 d3.csv("data/airports.csv", function (error, csv) {
     csv.forEach(function (d) {
+        // console.log("-")
 
         //Check if airport is already included in our list (-1 ==> not in list 0 ==>in list
         if(us_intl_airport_CODES.indexOf(d.IATA_Code) < 0 && d.Country === "United States") {
-            if(unique_codes.indexOf(d.IATA_Code) < 0) {
+            // console.log(d.IATA_Code)
+            // console.log(us_intl_airport_CODES.indexOf("SLC"))
+            if(us_intl_airport_CODES.indexOf(d.IATA_Code) < 0) {
                 d.IATA_Code = d.IATA_Code;
                 d.Country = d.Country;
                 State = {"IATA": d.IATA_Code, "Lat": d.Lat, "Long": d.Long};
@@ -185,6 +189,7 @@ d3.csv("data/airports.csv", function (error, csv) {
                 lat_long.push(l)
                 // console.log("d of 0 is "+l[0])
                 unique_codes.push(l)
+                console.log(d.Country)
             }
         }
     });
