@@ -182,6 +182,9 @@ function generateLineChart(SLC_average) {
         .range([0, width]);
 
     var y = d3.scaleLinear()
+        .domain(function (d) {
+            return ([d3.min(d.DepDelay), d3.max(d.DepDelay)]);
+        })
         .range([height, 0]);
 
     var line = d3.line()
@@ -192,10 +195,14 @@ function generateLineChart(SLC_average) {
         .y(function(d){
             return y(d.DepDelay);
         });
-
+    var min = function (d) {
+        return d3.min(d.DepDelay)
+    }
     var area = d3.area()
         .x(function(d) { return x(d.FlightDate); })
-        .y0(height)
+        .y0(function (d) {
+            return y(0)
+        })
         .y1(function(d) { return y(d.DepDelay); });
 
 
@@ -217,7 +224,7 @@ function generateLineChart(SLC_average) {
 
     svg.append("g")
         .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y).tickPadding(10))
+        .call(d3.axisLeft(y).ticks(38).tickPadding(10))
         .append("text")
         .attr("fill", "#000")
         .attr("transform", "rotate(-90)")
@@ -295,7 +302,7 @@ d3.csv("data/SLC_average.csv", function (error, csv) {
     SLC_average = csv;
     console.log(SLC_average)
     SLC_average = csv.filter(function (d) {
-        return new Date(d.FlightDate).getFullYear() === 1993;
+        return new Date(d.FlightDate).getFullYear() === 2015;
     });
 
     console.log("length of slc_avg is "+SLC_average.length)
