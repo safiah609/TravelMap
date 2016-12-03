@@ -11,3 +11,22 @@
     stroke-width: 2px;
     stroke-linejoin: round;
 }
+.arc {
+    fill: none;
+    stroke: gray;
+    stroke-width: 3px;
+    stroke-linecap: round;
+}
+
+.graticule {
+    fill: none;
+    stroke: #777;
+    stroke-width: .5px;
+    stroke-opacity: .5;
+}
+
+circle {
+    fill: steelblue;
+    fill-opacity: .8;
+    stroke: white;
+}
