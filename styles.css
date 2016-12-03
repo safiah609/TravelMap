@@ -30,3 +30,18 @@ circle {
     fill-opacity: .8;
     stroke: white;
 }
+
+.line {
+    fill: none;
+    stroke: red;
+    stroke-width: 1.5px;
+}
+
+.area {
+    fill: pink;
+}
+
+.focus circle {
+    fill: none;
+    stroke: steelblue;
+}

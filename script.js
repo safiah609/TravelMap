@@ -1,11 +1,11 @@
 var us_intl_airport_CODES;
-var all_us_intl_airpoots;
+var us_intl_airport_loc;
+var all_us_intl_airports;
 var lat_long = [];
-var unique_codes = [];
 var valid_codes = [];
-var SLC_average = [];
+// var SLC_average = [];
 
-function drawMap (all_us_intl_airpoots) {
+function drawMap (all_us_intl_airports_loc) {
     var w = 1500;
     var h = 1500;
     var projection = d3.geoAlbersUsa()
@@ -101,11 +101,11 @@ function drawMap (all_us_intl_airpoots) {
             // aa = [-111.908333, 40.762778];
             bb = [-122.389809, 37.72728];
             l = []
-            l.push(all_us_intl_airpoots[0])
+            l.push(all_us_intl_airports_loc[0])
             // add circles to svg
-            // console.log("len of data is "+all_us_intl_airpoots.length)
+            // console.log("len of data is "+all_us_intl_airports.length)
             var circles= svg.selectAll("circle")
-                .data(all_us_intl_airpoots).enter()
+                .data(all_us_intl_airports_loc).enter()
                 .append("circle")
                 .attr("cx", function (d) {
                     // console.log("d before if is "+d)
@@ -167,22 +167,22 @@ function drawMap (all_us_intl_airpoots) {
 
 function generateLineChart(SLC_average) {
     console.log("inside generate lines")
-    var margin = {top:20, right:20, bottom:40, left:20},
-        width = 900 - margin.left - margin.right,
+    var margin = {top:20, right:20, bottom:80, left:40},
+        width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
     var svg = d3.select("#l1")
         .append("svg")
         .attr("width",width + margin.left + margin.right)
         .attr("height",height + margin.top + margin.bottom)
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
     var x = d3.scaleTime()
-        .rangeRound([0, width]);
+        .range([0, width]);
 
     var y = d3.scaleLinear()
-        .rangeRound([height, 0]);
+        .range([height, 0]);
 
     var line = d3.line()
         .x(function(d){
@@ -190,89 +190,98 @@ function generateLineChart(SLC_average) {
             return x(d.FlightDate);
         })
         .y(function(d){
-            console.log(d.DepDelay)
             return y(d.DepDelay);
         });
 
-    x.domain(d3.extent(SLC_average, function(d) { return d.FlightDate; }));
-    y.domain(d3.extent(SLC_average, function(d) { return d.DepDelay; }));
+    var area = d3.area()
+        .x(function(d) { return x(d.FlightDate); })
+        .y0(height)
+        .y1(function(d) { return y(d.DepDelay); });
 
-    g.append("g")
+
+    x.domain(d3.extent(SLC_average, function(d) {
+        return d.FlightDate;
+    }));
+
+    y.domain(d3.extent(SLC_average, function(d) {
+        if(+d.DepDelay<0){
+            console.log("domain for y is "+d.DepDelay)
+        }
+        return +d.DepDelay;
+    }));
+
+    svg.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x).ticks(24));
 
-    g.append("g")
+    svg.append("g")
         .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y))
+        .call(d3.axisLeft(y).tickPadding(10))
         .append("text")
         .attr("fill", "#000")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("dy", "0.71em")
         .style("text-anchor", "end")
-        .text("Delay (minutes)");
+        .text("Delay Time (minutes)");
 
-    g.append("path")
+    svg.append("path")
         .datum(SLC_average)
-        .attr("class", "line")
-        .attr("d", line);
+        .attr("class", "area")
+        .attr("d", area)
+        .on("mouseover", function (d) {
+            // console.log(d.FlightDate);
+        })
 
 }
 
 
 
-// Load CSV files
-d3.csv("data/us_international_airports.csv", function (error, csv) {
-    csv.forEach(function (d) {
-        // console.log("code is "+d.code)
-        // Convert numeric values to 'numbers'
-        d.code = d.code;
-        valid_codes.push(d.code);
-    });
-
-    // var us_intl_airport_CODES = us_international_airports.map(function (d) {
-    //     return d.code;
-    // });
-
-    // Store csv data in a global variable
-    us_intl_airport_CODES = csv;
-    // console.log("codes are")
-    // console.log("size of intl. airport codes is "+us_intl_airport_CODES.length) //should be 68
-});
-
-// Load CSV files
-d3.csv("data/airports.csv", function (error, csv) {
-    csv.forEach(function (d) {
-        // console.log("-")
-        temp_check = []
-        //Check if airport is already included in our list (-1 ==> not in list 0 ==>in list
-        if(valid_codes.indexOf(d.IATA_Code) >= 0 && d.Country === "United States") {
-            // console.log(d.IATA_Code)
-
-            // console.log("index of C91 is "+us_intl_airport_CODES.indexOf("C91"))
-            if(temp_check.indexOf(d.IATA_Code) < 0) {
-                d.IATA_Code = d.IATA_Code;
-                d.Country = d.Country;
-                State = {"IATA": d.IATA_Code, "Lat": d.Lat, "Long": d.Long};
-                l = [d.Long, d.Lat]
-                lat_long.push(l)
-                // console.log("d of 0 is "+l[0])
-                unique_codes.push(l)
-                temp_check.push(d.IATA_Code)
-                // console.log(d.Country)
-            }
-        }
-    });
-
-    all_us_intl_airpoots = unique_codes;
-    // console.log("size of intl. airports is "+all_us_intl_airpoots.length)
-    drawMap(all_us_intl_airpoots)
-});
+// // Load CSV files
+// d3.csv("data/us_international_airports.csv", function (error, csv) {
+//     csv.forEach(function (d) {
+//         // console.log("code is "+d.code)
+//         // Convert numeric values to 'numbers'
+//         d.code = d.code;
+//         valid_codes.push(d.code);
+//     });
+//
+//     // var us_intl_airport_CODES = us_international_airports.map(function (d) {
+//     //     return d.code;
+//     // });
+//
+//     // Store csv data in a global variable
+//     us_intl_airport_CODES = csv;
+//     // console.log("codes are")
+//     // console.log("size of intl. airport codes is "+us_intl_airport_CODES.length) //should be 68
+// });
+//
+// // Load CSV files
+// d3.csv("data/airports.csv", function (error, csv) {
+//     var airport_loc = [];
+//     csv.forEach(function (d) {
+//         temp_check = [];
+//         //Check if airport is already included in our list (-1 ==> not in list 0 ==>in list
+//         if(valid_codes.indexOf(d.IATA_Code) >= 0 && d.Country === "United States") {
+//
+//             if(temp_check.indexOf(d.IATA_Code) < 0) {
+//                 d.IATA_Code = d.IATA_Code;
+//                 d.Country = d.Country;
+//                 State = {"IATA": d.IATA_Code, "Lat": d.Lat, "Long": d.Long};
+//                 l = [d.Long, d.Lat];
+//                 airport_loc.push(l)
+//                 temp_check.push(d.IATA_Code)
+//             }
+//         }
+//     });
+//     us_intl_airport_loc = airport_loc;
+//     drawMap(us_intl_airport_loc)
+// });
 
 
 d3.csv("data/SLC_average.csv", function (error, csv) {
-
+    var SLC_average = [];
     var format_time = d3.timeParse("%Y-%m-%d");
 
     csv.forEach(function (d) {
@@ -283,11 +292,12 @@ d3.csv("data/SLC_average.csv", function (error, csv) {
         // d.CRSElapsedTime = d. CRSElapsedTime;
         // d.ActualElapsedTime = d.ActualElapsedTime;
     });
-
+    SLC_average = csv;
+    console.log(SLC_average)
     SLC_average = csv.filter(function (d) {
         return new Date(d.FlightDate).getFullYear() === 1993;
     });
 
     console.log("length of slc_avg is "+SLC_average.length)
-    // generateLineChart(SLC_average)
+    generateLineChart(SLC_average)
 })
