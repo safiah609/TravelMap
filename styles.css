@@ -37,8 +37,12 @@ circle {
     stroke-width: 1.5px;
 }
 
-.area {
+.negarea {
     fill: red;
+}
+
+.area {
+    fill: steelblue;
 }
 
 .focus circle {

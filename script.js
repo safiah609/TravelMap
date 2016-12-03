@@ -3,7 +3,6 @@ var us_intl_airport_loc;
 var all_us_intl_airports;
 var lat_long = [];
 var valid_codes = [];
-// var SLC_average = [];
 
 function drawMap (all_us_intl_airports_loc) {
     var w = 1500;
@@ -168,8 +167,11 @@ function drawMap (all_us_intl_airports_loc) {
 function generateLineChart(SLC_average) {
     console.log("inside generate lines")
     var margin = {top:20, right:20, bottom:80, left:40},
+        margin2 = {top: 430, right: 20, bottom: 10, left: 40},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
+        height2 = 500 - margin2.top - margin2.bottom;
+
 
     var svg = d3.select("#l1")
         .append("svg")
@@ -179,6 +181,9 @@ function generateLineChart(SLC_average) {
 
 
     var x = d3.scaleTime()
+        .range([0, width]);
+
+    var x2 = d3.scaleTime()
         .range([0, width]);
 
     var y = d3.scaleLinear()
@@ -198,13 +203,17 @@ function generateLineChart(SLC_average) {
     var min = function (d) {
         return d3.min(d.DepDelay)
     }
+
     var area = d3.area()
-        .x(function(d) { return x(d.FlightDate); })
+        .x(function(d) {
+            return x(d.FlightDate);
+        })
         .y0(function (d) {
             return y(0)
         })
-        .y1(function(d) { return y(d.DepDelay); });
-
+        .y1(function(d) {
+            return y(d.DepDelay);
+        });
 
     x.domain(d3.extent(SLC_average, function(d) {
         return d.FlightDate;
@@ -212,7 +221,7 @@ function generateLineChart(SLC_average) {
 
     y.domain(d3.extent(SLC_average, function(d) {
         if(+d.DepDelay<0){
-            console.log("domain for y is "+d.DepDelay)
+            // d3.select(this).classed("negarea", "true")
         }
         return +d.DepDelay;
     }));
@@ -294,16 +303,16 @@ d3.csv("data/SLC_average.csv", function (error, csv) {
     csv.forEach(function (d) {
         d.FlightDate = format_time(d.FlightDate);
         // d.Origin = d.Origin;
-        // d.DepDelay = d.DepDelay;
+        d.DepDelay = d.DepDelay;
         // d.ArrDelay = d.ArrDelay;
         // d.CRSElapsedTime = d. CRSElapsedTime;
         // d.ActualElapsedTime = d.ActualElapsedTime;
     });
     SLC_average = csv;
     console.log(SLC_average)
-    SLC_average = csv.filter(function (d) {
-        return new Date(d.FlightDate).getFullYear() === 2015;
-    });
+    // SLC_average = csv.filter(function (d) {
+    //     return new Date(d.FlightDate).getFullYear() === 2015;
+    // });
 
     console.log("length of slc_avg is "+SLC_average.length)
     generateLineChart(SLC_average)
